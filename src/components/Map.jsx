@@ -8,7 +8,7 @@ import Button from "./Button";
 import { useUrlPosition } from "../hooks/useUrlPosition";
 
 function Map() {
-  const [position, setPosition] = useState([42.87, 25.52]);
+  const [position, setPosition] = useState([0, 0]);
   const { cities } = useCities();
   const {
     isLoading: positionLoading,

@@ -19,6 +19,42 @@ function CitiesProvider({ children }) {
       setIsLoading(false);
     }
   }
+
+  async function deleteCity(id) {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${BASE_URL}/cities/${id}`, {
+        method: "DELETE",
+      });
+      await response.json();
+      setCities((cities) => cities.filter((city) => city.id !== id));
+    } catch (error) {
+      alert("An error occurred while deleting city:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function createCity(newCity) {
+    console.log(newCity);
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${BASE_URL}/cities`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newCity),
+      });
+      const data = await response.json();
+      setCurrentCity(data);
+      setCities((cities) => [...cities, data]);
+    } catch (error) {
+      alert("An error occurred while creating city:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
   useEffect(() => {
     async function fetchCities() {
       try {
@@ -39,6 +75,8 @@ function CitiesProvider({ children }) {
     isLoading,
     currentCity,
     getCurrentCity,
+    createCity,
+    deleteCity,
   };
 
   return (
