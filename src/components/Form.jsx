@@ -1,10 +1,13 @@
 // "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=0&longitude=0"
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import styles from "./Form.module.css";
 import ButtonBack from "./ButtonBack";
 import Button from "./Button";
+import { useUrlPosition } from "../hooks/useUrlPosition";
+import Message from "./Message";
+import Spinner from "./Spinner";
 
 export function convertToEmoji(countryCode) {
   const codePoints = countryCode
@@ -13,14 +16,44 @@ export function convertToEmoji(countryCode) {
     .map((char) => 127397 + char.charCodeAt());
   return String.fromCodePoint(...codePoints);
 }
+const BASE_URL = "https://api.bigdatacloud.net/data/reverse-geocode-client";
 
 function Form() {
   const [cityName, setCityName] = useState("");
-  //eslint-disable-next-line
   const [country, setCountry] = useState("");
+  const [emoji, setEmoji] = useState("");
   const [date, setDate] = useState(new Date());
+  const [isCityInfoLoading, setIsCityInfoLoading] = useState(false);
   const [notes, setNotes] = useState("");
-
+  const [locationError, setLocationError] = useState(null);
+  const [lat, lng] = useUrlPosition();
+  useEffect(() => {
+    async function fetchCityInfo() {
+      setIsCityInfoLoading(true);
+      setLocationError(null);
+      try {
+        const response = await fetch(
+          BASE_URL + `?latitude=${lat}&longitude=${lng}`
+        );
+        const data = await response.json();
+        console.log(data);
+        if (!data.countryCode)
+          throw new Error(
+            "There is no city on this location, please click somewhere else 🤔"
+          );
+        setCityName(data.city);
+        setCountry(data.countryName);
+        setEmoji(convertToEmoji(data.countryCode));
+      } catch (e) {
+        setLocationError(e.message);
+      } finally {
+        setIsCityInfoLoading(false);
+      }
+    }
+    fetchCityInfo();
+  }, [lat, lng]);
+  if (isCityInfoLoading) return <Spinner />;
+  if (locationError) return <Message message={locationError} />;
   return (
     <form className={styles.form}>
       <div className={styles.row}>
@@ -30,7 +63,7 @@ function Form() {
           onChange={(e) => setCityName(e.target.value)}
           value={cityName}
         />
-        {/* <span className={styles.flag}>{emoji}</span> */}
+        <span className={styles.flag}>{emoji}</span>
       </div>
 
       <div className={styles.row}>

@@ -2,20 +2,38 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import styles from "./Map.module.css";
 import { useState, useEffect } from "react";
 import { useCities } from "../contexts/CitiesContext";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useGeolocation } from "../hooks/useGeolocation,js";
+import Button from "./Button";
+import { useUrlPosition } from "../hooks/useUrlPosition";
 
 function Map() {
   const [position, setPosition] = useState([42.87, 25.52]);
   const { cities } = useCities();
-  const [searchParams] = useSearchParams();
-  const { lat, lng } = Object.fromEntries(searchParams);
+  const {
+    isLoading: positionLoading,
+    getPosition,
+    position: geoLocationPosition,
+  } = useGeolocation();
+  const [lat, lng] = useUrlPosition();
   useEffect(() => {
     if (lat && lng) {
       setPosition([parseFloat(lat), parseFloat(lng)]);
     }
   }, [lat, lng]);
+  useEffect(() => {
+    if (geoLocationPosition) {
+      setPosition([geoLocationPosition.lat, geoLocationPosition.lng]);
+    }
+  }, [geoLocationPosition]);
   return (
     <div className={styles.mapContainer}>
+      {!geoLocationPosition && (
+        <Button type="position" onClick={getPosition}>
+          {positionLoading ? "Loading..." : "Get current position"}
+        </Button>
+      )}
+
       <MapContainer
         center={position}
         zoom={13}
