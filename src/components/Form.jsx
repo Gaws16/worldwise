@@ -21,7 +21,7 @@ export function convertToEmoji(countryCode) {
   return String.fromCodePoint(...codePoints);
 }
 const BASE_URL = "https://api.bigdatacloud.net/data/reverse-geocode-client";
-
+//TODO: replace useState with useReduser
 function Form() {
   const [cityName, setCityName] = useState("");
   const [country, setCountry] = useState("");
