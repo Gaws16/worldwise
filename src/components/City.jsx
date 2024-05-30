@@ -21,8 +21,7 @@ function City() {
     () => async () => {
       await getCurrentCity(id);
     },
-    // eslint-disable-next-line
-    [id]
+    [id, getCurrentCity]
   );
   const { cityName, emoji, date, notes } = currentCity;
   if (isLoading) {
